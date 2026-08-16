@@ -13,7 +13,7 @@ export default async function handler(request, response) {
   }
 
   const webhookUrl =
-    "https://meta-tracker-rho.vercel.app/api/telegram/webhook";
+    "https://sekhar-meta-tracker.vercel.app/api/telegram/webhook";
 
   try {
     const telegramResponse = await fetch(
@@ -25,7 +25,7 @@ export default async function handler(request, response) {
         },
         body: JSON.stringify({
           url: webhookUrl,
-          allowed_updates: ["chat_member"],
+          allowed_updates: ["chat_member", "chat_join_request"],
           drop_pending_updates: true
         })
       }
