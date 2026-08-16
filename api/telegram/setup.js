@@ -6,7 +6,6 @@ export default async function handler(request, response) {
     });
   }
 
-  // Bot token is stored securely in Vercel Environment Variables
   const token = process.env.TELEGRAM_BOT_TOKEN;
 
   if (!token) {
@@ -16,7 +15,6 @@ export default async function handler(request, response) {
     });
   }
 
-  // NEW tracker webhook URL
   const webhookUrl =
     "https://sekhar-meta-tracker.vercel.app/api/telegram/webhook";
 
@@ -45,41 +43,6 @@ export default async function handler(request, response) {
 
   } catch (error) {
     console.error("Telegram webhook error:", error);
-
-    return response.status(500).json({
-      ok: false,
-      error: "Failed to configure Telegram webhook"
-    });
-  }
-}
-      error: "TELEGRAM_BOT_TOKEN is missing"
-    });
-  }
-
-  const webhookUrl =
-    "https://sekhar-meta-tracker.vercel.app/api/telegram/webhook";
-
-  try {
-    const telegramResponse = await fetch(
-      `https://api.telegram.org/bot${token}/setWebhook`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          url: webhookUrl,
-          allowed_updates: ["chat_member", "chat_join_request"],
-          drop_pending_updates: true
-        })
-      }
-    );
-
-    const result = await telegramResponse.json();
-
-    return response.status(200).json(result);
-  } catch (error) {
-    console.error(error);
 
     return response.status(500).json({
       ok: false,
