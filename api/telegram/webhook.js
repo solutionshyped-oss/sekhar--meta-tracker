@@ -1,4 +1,4 @@
-module.exports = async function handler(request, response) {
+export default async function handler(request, response) {
   try {
     // ==========================================
     // ONLY ACCEPT TELEGRAM POST REQUESTS
@@ -47,7 +47,6 @@ module.exports = async function handler(request, response) {
       update?.chat_join_request;
 
     if (joinRequest) {
-
       console.log(
         "TELEGRAM JOIN REQUEST:",
         JSON.stringify(joinRequest)
@@ -61,7 +60,6 @@ module.exports = async function handler(request, response) {
         joinRequest.invite_link?.invite_link;
 
       if (!inviteLink) {
-
         console.log(
           "NO INVITE LINK FOUND IN JOIN REQUEST"
         );
@@ -89,7 +87,6 @@ module.exports = async function handler(request, response) {
           `${redisUrl}/get/${inviteKey}`,
           {
             method: "GET",
-
             headers: {
               Authorization:
                 `Bearer ${redisToken}`
@@ -98,7 +95,6 @@ module.exports = async function handler(request, response) {
         );
 
       if (!trackingResponse.ok) {
-
         console.error(
           "Redis invite lookup error:",
           await trackingResponse.text()
@@ -121,7 +117,6 @@ module.exports = async function handler(request, response) {
       // ------------------------------------------
 
       if (!trackingId) {
-
         console.log(
           "NO TRACKING ID FOUND FOR INVITE:",
           inviteLink
@@ -163,17 +158,11 @@ module.exports = async function handler(request, response) {
 
       const requestData = {
         tracking_id: trackingId,
-
         invite_link: inviteLink,
-
         telegram_user_id: userId,
-
         telegram_username: username,
-
         first_name: firstName,
-
         requested_at: requestDate,
-
         status: "pending"
       };
 
@@ -187,27 +176,22 @@ module.exports = async function handler(request, response) {
           `${redisUrl}/set/join_request:${encodeURIComponent(trackingId)}`,
           {
             method: "POST",
-
             headers: {
               Authorization:
                 `Bearer ${redisToken}`,
-
               "Content-Type":
                 "application/json"
             },
-
             body:
               JSON.stringify(requestData)
           }
         );
 
       if (!requestResponse.ok) {
-
         console.error(
           "Redis join request save error:",
           await requestResponse.text()
         );
-
       }
 
       // ------------------------------------------
@@ -219,7 +203,6 @@ module.exports = async function handler(request, response) {
           `${redisUrl}/incr/total_join_requests`,
           {
             method: "POST",
-
             headers: {
               Authorization:
                 `Bearer ${redisToken}`
@@ -228,23 +211,17 @@ module.exports = async function handler(request, response) {
         );
 
       if (!incrementResponse.ok) {
-
         console.error(
           "Failed to increment join requests:",
           await incrementResponse.text()
         );
-
       }
 
       return response.status(200).json({
         ok: true,
-
         type: "chat_join_request",
-
         tracking_id: trackingId,
-
         telegram_user_id: userId,
-
         status: "pending"
       });
     }
@@ -260,7 +237,6 @@ module.exports = async function handler(request, response) {
       update?.chat_member;
 
     if (chatMember) {
-
       console.log(
         "TELEGRAM CHAT MEMBER UPDATE:",
         JSON.stringify(chatMember)
@@ -291,7 +267,6 @@ module.exports = async function handler(request, response) {
         oldStatus !== "member";
 
       if (!becameMember) {
-
         return response.status(200).json({
           ok: true,
           message: "Not a new member"
@@ -306,7 +281,6 @@ module.exports = async function handler(request, response) {
         chatMember.invite_link?.invite_link;
 
       if (!inviteLink) {
-
         console.log(
           "NO INVITE LINK FOUND IN CHAT MEMBER UPDATE"
         );
@@ -334,7 +308,6 @@ module.exports = async function handler(request, response) {
           `${redisUrl}/get/${inviteKey}`,
           {
             method: "GET",
-
             headers: {
               Authorization:
                 `Bearer ${redisToken}`
@@ -343,7 +316,6 @@ module.exports = async function handler(request, response) {
         );
 
       if (!trackingResponse.ok) {
-
         console.error(
           "Redis member invite lookup error:",
           await trackingResponse.text()
@@ -362,7 +334,6 @@ module.exports = async function handler(request, response) {
         trackingResult.result;
 
       if (!trackingId) {
-
         console.log(
           "NO TRACKING ID FOUND FOR MEMBER INVITE"
         );
@@ -403,7 +374,6 @@ module.exports = async function handler(request, response) {
       // ------------------------------------------
 
       const joinData = {
-
         tracking_id:
           trackingId,
 
@@ -436,7 +406,6 @@ module.exports = async function handler(request, response) {
           `${redisUrl}/set/join:${encodeURIComponent(trackingId)}`,
           {
             method: "POST",
-
             headers: {
               Authorization:
                 `Bearer ${redisToken}`,
@@ -451,12 +420,10 @@ module.exports = async function handler(request, response) {
         );
 
       if (!joinResponse.ok) {
-
         console.error(
           "Redis join save error:",
           await joinResponse.text()
         );
-
       }
 
       // ------------------------------------------
@@ -477,16 +444,13 @@ module.exports = async function handler(request, response) {
         );
 
       if (!incrementResponse.ok) {
-
         console.error(
           "Failed to increment total joins:",
           await incrementResponse.text()
         );
-
       }
 
       return response.status(200).json({
-
         ok: true,
 
         type:
@@ -500,7 +464,6 @@ module.exports = async function handler(request, response) {
 
         status:
           "joined"
-
       });
     }
 
@@ -514,7 +477,6 @@ module.exports = async function handler(request, response) {
     });
 
   } catch (error) {
-
     console.error(
       "WEBHOOK ERROR:",
       error
@@ -526,4 +488,4 @@ module.exports = async function handler(request, response) {
       message: error.message
     });
   }
-};
+}
