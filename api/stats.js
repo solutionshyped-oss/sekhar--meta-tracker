@@ -34,7 +34,8 @@ export default async function handler(request, response) {
         const data = await result.json();
 
         return data.result ?? null;
-      } catch {
+      } catch (error) {
+        console.error("Redis GET error:", error);
         return null;
       }
     }
@@ -43,11 +44,8 @@ export default async function handler(request, response) {
     // TOTAL CLICKS
     // ==========================================
 
-    const clicksValue =
-      await getRedis("total_clicks");
-
-    const totalClicks =
-      Number(clicksValue || 0);
+    const clicksValue = await getRedis("total_clicks");
+    const totalClicks = Number(clicksValue || 0);
 
     // ==========================================
     // TOTAL JOIN REQUESTS
@@ -60,7 +58,7 @@ export default async function handler(request, response) {
       Number(requestsValue || 0);
 
     // ==========================================
-    // TOTAL APPROVED / JOINS
+    // TOTAL CONFIRMED JOINS
     // ==========================================
 
     const joinsValue =
@@ -68,12 +66,6 @@ export default async function handler(request, response) {
 
     const totalJoins =
       Number(joinsValue || 0);
-
-    // ==========================================
-    // PENDING REQUESTS
-    // ==========================================
-
-    let pendingRequests = 0;
 
     // ==========================================
     // GET CLICK RECORDS
@@ -99,27 +91,20 @@ export default async function handler(request, response) {
         for (const key of keys.slice(0, 100)) {
           try {
             const keyName =
-              String(key).replace(
-                /^click:/,
-                ""
-              );
+              String(key).replace(/^click:/, "");
 
             const recordValue =
-              await getRedis(
-                "click:" + keyName
-              );
+              await getRedis("click:" + keyName);
 
             if (!recordValue) {
               continue;
             }
 
-            let record =
-              recordValue;
+            let record = recordValue;
 
             if (typeof record === "string") {
               try {
-                record =
-                  JSON.parse(record);
+                record = JSON.parse(record);
               } catch {
                 continue;
               }
@@ -127,36 +112,28 @@ export default async function handler(request, response) {
 
             clicks.push({
               tracking_id:
-                record.tracking_id ||
-                keyName,
+                record.tracking_id || keyName,
 
               timestamp:
-                record.timestamp ||
-                null,
+                record.timestamp || null,
 
               fbclid:
-                record.fbclid ||
-                null,
+                record.fbclid || null,
 
               utm_source:
-                record.utm_source ||
-                null,
+                record.utm_source || null,
 
               utm_medium:
-                record.utm_medium ||
-                null,
+                record.utm_medium || null,
 
               utm_campaign:
-                record.utm_campaign ||
-                null,
+                record.utm_campaign || null,
 
               utm_content:
-                record.utm_content ||
-                null,
+                record.utm_content || null,
 
               utm_term:
-                record.utm_term ||
-                null
+                record.utm_term || null
             });
 
           } catch (error) {
@@ -213,13 +190,11 @@ export default async function handler(request, response) {
               continue;
             }
 
-            let record =
-              recordValue;
+            let record = recordValue;
 
             if (typeof record === "string") {
               try {
-                record =
-                  JSON.parse(record);
+                record = JSON.parse(record);
               } catch {
                 continue;
               }
@@ -227,28 +202,22 @@ export default async function handler(request, response) {
 
             requests.push({
               tracking_id:
-                record.tracking_id ||
-                keyName,
+                record.tracking_id || keyName,
 
               telegram_user_id:
-                record.telegram_user_id ||
-                null,
+                record.telegram_user_id || null,
 
               telegram_username:
-                record.telegram_username ||
-                null,
+                record.telegram_username || null,
 
               first_name:
-                record.first_name ||
-                null,
+                record.first_name || null,
 
               requested_at:
-                record.requested_at ||
-                null,
+                record.requested_at || null,
 
               status:
-                record.status ||
-                "pending"
+                record.status || "pending"
             });
 
           } catch (error) {
@@ -268,13 +237,12 @@ export default async function handler(request, response) {
     }
 
     // ==========================================
-    // CALCULATE PENDING
+    // PENDING REQUESTS
     // ==========================================
 
-    pendingRequests =
+    const pendingRequests =
       requests.filter(
-        request =>
-          request.status === "pending"
+        item => item.status === "pending"
       ).length;
 
     // ==========================================
@@ -345,7 +313,6 @@ export default async function handler(request, response) {
     });
 
   } catch (error) {
-
     console.error(
       "STATS ERROR:",
       error
@@ -357,3 +324,4 @@ export default async function handler(request, response) {
         "Failed to load statistics"
     });
   }
+}
